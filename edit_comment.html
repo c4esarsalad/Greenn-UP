@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать комментарий</title>
+</head>
+<body>
+    <h2>Редактировать комментарий</h2>
+    <form method="POST">
+        <textarea name="comment_content" rows="4" cols="50">{{ comment.content }}</textarea><br>
+        <button type="submit">Сохранить</button>
+    </form>
+    <br>
+    <a href="{{ url_for('def_view_other_profile', user_id=comment.post.user_id) }}">Назад</a>
+</body>
+</html>

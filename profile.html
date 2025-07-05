@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль — GreenUP</title>
+</head>
+<body>
+
+<nav>
+    <a href="{{ url_for('def_dashboard') }}">Главная</a> |
+    <a href="{{ url_for('def_friends_page') }}">Друзья</a> |
+    <a href="{{ url_for('def_profile_page') }}">Профиль</a>
+</nav>
+
+<h1>{{ user.username }}</h1>
+
+<img src="{{ url_for('static', filename='uploads/' ~ user.avatar) }}" alt="Аватар" width="150">
+
+{% if user.id == session['user_id'] %}
+<form method="POST" enctype="multipart/form-data" action="{{ url_for('update_profile') }}">
+    <input type="file" name="avatar">
+    <button type="submit">Обновить аватар</button>
+</form>
+<form method="POST" action="{{ url_for('def_update_username') }}">
+    <label>Никнейм:</label>
+    <input type="text" name="username" value="{{ user.username }}">
+    <button type="submit">Сохранить</button>
+</form>
+<p>Дата регистрации: {{ user.created_time.strftime('%d.%m.%Y') }}</p>
+<form method="POST" action="{{ url_for('def_update_description') }}">
+    <label>Описание:</label><br>
+    <textarea name="description" rows="4" cols="50">{{ user.description }}</textarea><br>
+    <button type="submit">Сохранить</button>
+</form>
+{% else %}
+<p>Дата регистрации: {{ user.created_time.strftime('%d.%m.%Y') }}</p>
+<p>{{ user.description }}</p>
+{% if is_friend %}
+    <p style="color:green;">У вас в друзьях</p>
+{% elif pending_request %}
+    <p style="color:orange;">Запрос отправлен</p>
+{% else %}
+    <form method="POST" action="{{ url_for('send_friend_request', receiver_id=user.id) }}">
+        <button type="submit">Добавить в друзья</button>
+    </form>
+{% endif %}
+{% endif %}
+
+<hr>
+
+<h2>Друзья ({{ friends|length }})</h2>
+<ul>
+{% for friend in friends %}
+    <li>
+        <img src="{{ url_for('static', filename='uploads/' ~ friend.avatar) }}" width="30">
+        <a href="{{ url_for('def_view_other_profile', user_id=friend.id) }}">{{ friend.username }}</a>
+    </li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h2>Посты пользователя</h2>
+{% if posts %}
+{% for post in posts %}
+<div>
+    <h3>{{ post.title }}</h3>
+    {% if post.image %}
+    <img src="{{ url_for('static', filename='uploads/' ~ post.image) }}" width="200">
+    {% endif %}
+    <p>{{ post.content }}</p>
+    <p><b>Автор:</b> {{ user.username }}</p>
+    {% if post.edited %}<small>(отредактировано)</small>{% endif %}
+    {% if user.id == session['user_id'] %}
+        <a href="{{ url_for('def_edit_post', post_id=post.id) }}">Редактировать</a>
+        <form method="POST" action="{{ url_for('def_delete_post', post_id=post.id) }}" style="display:inline;">
+            <button type="submit">Удалить</button>
+        </form>
+    {% endif %}
+    <div>
+        <h4>Комментарии:</h4>
+        {% for comment in post.comments %}
+            <div>
+                <b>{{ comment.user.username }}</b>: {{ comment.content }}
+                {% if comment.edited %}<small>(отредактировано)</small>{% endif %}
+                <small>{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                {% if comment.user_id == session['user_id'] %}
+                    <a href="{{ url_for('edit_comment', comment_id=comment.id) }}">Редактировать</a>
+                    <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" style="display:inline;">
+                        <button type="submit">Удалить</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Комментариев нет.</p>
+        {% endfor %}
+        <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+            <input type="text" name="comment_content" placeholder="Оставить комментарий" required>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+</div>
+<hr>
+{% endfor %}
+{% else %}
+<p>У пользователя пока нет постов.</p>
+{% endif %}
+
+{% if user.id == session['user_id'] %}
+<h2>Создать новый пост</h2>
+<form method="POST" enctype="multipart/form-data" action="{{ url_for('def_create_post') }}">
+    <input type="text" name="title" placeholder="Заголовок" required><br>
+    <textarea name="content" rows="4" cols="50" placeholder="Описание" required></textarea><br>
+    <input type="file" name="image"><br>
+    <button type="submit">Опубликовать</button>
+</form>
+{% endif %}
+
+</body>
+</html>

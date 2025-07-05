@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать пост</title>
+</head>
+<body>
+    <h1>Редактировать пост</h1>
+    <form method="POST">
+        <label>Заголовок:</label><br>
+        <input type="text" name="title" value="{{ post.title }}"><br>
+        <label>Содержание:</label><br>
+        <textarea name="content" rows="5" cols="40">{{ post.content }}</textarea><br>
+        <button type="submit">Сохранить</button>
+    </form>
+    <br>
+    <a href="{{ url_for('def_profile_page') }}">Назад в профиль</a>
+</body>
+</html>

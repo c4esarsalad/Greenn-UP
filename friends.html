@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Друзья</title>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('def_dashboard') }}">Главная</a> |
+        <a href="{{ url_for('def_friends_page') }}">Друзья</a> |
+        <a href="{{ url_for('def_profile_page') }}">Профиль</a>
+    </nav>
+    <h1>Друзья</h1>
+    <form method="POST" action="{{ url_for('search_friend') }}">
+        <input type="text" name="username_temp" placeholder="Имя друга">
+        <button type="submit">Поиск</button>
+    </form>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    {% if find_result %}
+        <h3>Найден: {{ find_result.username }}</h3>
+        {% if find_result.id != user.id %}
+            {% set already_friend = false %}
+            {% for friend in friends %}
+                {% if friend.id == find_result.id %}{% set already_friend = true %}{% endif %}
+            {% endfor %}
+            {% set request_sent = false %}
+            {% for req in requests %}
+                {% if req.sender.id == user.id and req.receiver_id == find_result.id and req.status == 'pending' %}{% set request_sent = true %}{% endif %}
+            {% endfor %}
+            {% if already_friend %}
+                <p>Уже в друзьях</p>
+            {% elif request_sent %}
+                <p>Заявка отправлена</p>
+            {% else %}
+                <form action="{{ url_for('send_friend_request', receiver_id=find_result.id) }}" method="post">
+                    <button type="submit">Добавить в друзья</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    <h3>Запросы в друзья:</h3>
+    {% if requests %}
+        <ul>
+        {% for req in requests %}
+            <li>{{ req.sender.username }}
+                <form method="post" action="{{ url_for('respond_friend_request', request_id=req.id, action='accept') }}" style="display:inline">
+                    <button>Принять</button>
+                </form>
+                <form method="post" action="{{ url_for('respond_friend_request', request_id=req.id, action='decline') }}" style="display:inline">
+                    <button>Отклонить</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет входящих запросов</p>
+    {% endif %}
+    <h3>Твои друзья:</h3>
+    {% if friends %}
+        <ul>
+        {% for friend in friends %}
+            <li>
+                <a href="{{ url_for('def_view_other_profile', user_id=friend.id) }}">{{ friend.username }}</a>
+                <form action="{{ url_for('def_remove_friend', friend_id=friend.id) }}" method="post" style="display:inline">
+                    <button type="submit">Удалить</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет друзей</p>
+    {% endif %}
+    <a href="{{ url_for('def_profile_page') }}">Назад в профиль</a>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Главная - GreenUP</title>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('def_dashboard') }}">Главная</a> |
+        <a href="{{ url_for('def_friends_page') }}">Друзья</a> |
+        <a href="{{ url_for('def_profile_page') }}">Профиль</a>
+    </nav>
+    <h1>Добро пожаловать, {{ username }}!</h1>
+    <p>Уровень: {{ level }}</p>
+    <p>Опыт: {{ xp }}/100</p>
+    {% if tasks %}
+        <h2>Задания:</h2>
+        <ul>
+        {% for task in tasks %}
+            <li>
+                {{ task.description }}
+                {% if not task.completed %}
+                    <form method="POST" action="{{ url_for('def_complete_task', task_id=task.id) }}" style="display:inline;">
+                        <button type="submit">Выполнить</button>
+                    </form>
+                {% else %}
+                    <strong>✔ Выполнено</strong>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Новые задания появятся через {{ remaining_hours }} часов и {{ remaining_minutes }} минут.</p>
+    {% endif %}
+    <hr>
+    <h3>Совет:</h3>
+    <p>{{ random_tip }}</p>
+    <form method="POST" action="{{ url_for('def_logout') }}">
+        <button type="submit">Выйти из аккаунта</button>
+    </form>
+</body>
+</html>
